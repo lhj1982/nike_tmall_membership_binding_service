@@ -1,0 +1,31 @@
+{
+  "name": "nike_tmall_membership_binding_service",
+  "version": "1.0.0",
+  "description": "Binding service for Nike Tmall memebership",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lhj1982/nike_tmall_membership_binding_service.git"
+  },
+  "keywords": [
+    "Lambda",
+    "Nodejs",
+    "Cloudformation"
+  ],
+  "author": "James Li",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lhj1982/nike_tmall_membership_binding_service/issues"
+  },
+  "homepage": "https://github.com/lhj1982/nike_tmall_membership_binding_service#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "aws-sdk": "^2.203.0",
+    "aws-sdk-mock": "^1.7.0",
+    "chai": "^4.1.2",
+    "mocha": "^5.0.1"
+  }
+}

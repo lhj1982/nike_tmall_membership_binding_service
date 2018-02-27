@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  # Role
+  LambdaRole: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+  LambdaPolicies:
+    DependsOn:
+      - MembershipBindingTable
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: !Join ["-", [!Ref App, !Ref Stage, "TmallNikeMembershipPolicy"]]
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          -
+            Effect: "Allow"
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+            Resource: "arn:aws:logs:*:*:*"
+          -
+            Effect: "Allow"
+            Action:
+              - "dynamodb:BatchWriteItem"
+              - "dynamodb:Scan"
+              - "dynamodb:Query"
+              - "dynamodb:GetItem"
+              - "dynamodb:PutItem"
+              - "dynamodb:UpdateItem"
+              - "dynamodb:DeleteItem"
+            Resource:
+              - !GetAtt MembershipBindingTable.Arn
+      Roles:
+        - !Ref LambdaRole
+        
+  # Lambda
+  BindingService:
+    Type: AWS::Serverless::Function
+    
+    Properties:
+      FunctionName: !Join ["-", [!Ref Stage, "BindingService"]]
+      Description: Memebership binding service
+      Handler: index.handler
+      CodeUri: ../functions/BindingService/
+      Runtime: nodejs6.10
+      Role: !GetAtt LambdaRole.Arn
+      Environment:
+        Variables: 
+          MembershipBindingTable: !Ref MembershipBindingTable
+  
+  # Tables
+  MembershipBindingTable:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      TableName: !Join ["-", [!Ref Stage, "MembershipBinding"]]
+      AttributeDefinitions: 
+        - AttributeName: encryptedNick 
+          AttributeType: S
+      KeySchema: 
+        - AttributeName: encryptedNick
+          KeyType: HASH
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+# Misc
+Parameters:
+  App:
+    Type: "String"
+  Stage:
+    Type: "String"
+  Region:
+    Type: "String"
+# Outputs
+Outputs:
+  MembershipBindingTableArn:
+    Value: !GetAtt MembershipBindingTable.Arn
+  BindingServiceLambdaArn:
+    Value: !GetAtt BindingService.Arn
+
